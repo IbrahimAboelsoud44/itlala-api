@@ -31,6 +31,9 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Routes
+app.get("/", (req, res) => {
+  res.send("API is running ");
+});
 app.use("/api/auth", require("./src/routes/authRoutes"));
 app.use("/api/items", require("./src/routes/itemRoutes"));
 app.use("/api/wardrobe", require("./src/routes/wardrobeRoutes"));
