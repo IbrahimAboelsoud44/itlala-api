@@ -16,6 +16,7 @@ console.log("JWT_SECRET =", process.env.JWT_SECRET);
 connectDB();
 
 const app = express();
+app.set('trust proxy', 1);
 
 // Middleware
 app.use(cors());
