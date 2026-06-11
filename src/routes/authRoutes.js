@@ -6,12 +6,14 @@ const {
   signup,
   login,
   getProfile,
-  googleLogin,
+  googleAuth,
+  updateGender,
   facebookLogin,
   forgotPassword,
   resetPassword,
   verifyEmail,
   refreshToken,
+  deleteAccount,
 } = require("../controllers/authController");
 
 
@@ -20,11 +22,17 @@ const {
 router.post("/signup", signupValidation, signup); 
 router.post("/login", loginValidation, login);
 router.get("/profile", protect, getProfile);
-router.post("/google", googleLogin);
+router.post("/google", googleAuth);
+router.put("/gender", protect, updateGender);
 router.post("/facebook-login", facebookLogin);
 router.post("/forgot-password", forgotPassword);
 router.put("/reset-password/:token", resetPassword);
 router.get("/verify-email/:token", verifyEmail);
 router.post("/refresh-token", refreshToken);
+router.delete(
+  "/delete-account",
+  protect,
+  deleteAccount
+);
 
 module.exports = router;
