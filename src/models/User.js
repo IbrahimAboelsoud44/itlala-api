@@ -12,11 +12,15 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
+      default: null,
+    },
+    photo: {
+  type: String, 
     },
     gender: {
   type: String,
   enum: ['male', 'female'],
-  required: true 
+  default: null,
     },
     provider: {
       type: String,
