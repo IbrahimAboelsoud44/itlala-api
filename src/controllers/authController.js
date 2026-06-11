@@ -5,9 +5,7 @@ const crypto = require("crypto");
 const axios = require("axios");
 const User = require("../models/User");
 const Wardrobe = require("../models/Wardrobe");
-const { OAuth2Client } = require("google-auth-library");
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Generate JWT
 const generateAccessToken = (id) => {
@@ -47,7 +45,12 @@ exports.signup = async (req, res) => {
       sameSite: "strict",
     });
 
-    res.status(201).json({ accessToken, message: "User created" });
+    res.status(201).json({ message: "User created", accessToken, user: {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    gender: user.gender,
+  } });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -76,8 +79,7 @@ exports.login = async (req, res) => {
 
     res.json({ 
       message:"login successful",
-      accessToken,
-      user: {
+      accessToken, user: {
     id: user._id,
     name: user.name,
     email: user.email,
@@ -114,38 +116,87 @@ exports.getProfile = async (req, res) => {
 };
 
 // Google Login
-exports.googleLogin = async (req, res) => {
+exports.googleAuth = async (req, res) => {
   try {
-    const { token } = req.body;
 
-    const ticket = await client.verifyIdToken({
-      idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
+    const { name, email, photo } = req.body;
 
-    const payload = ticket.getPayload();
-    const { email, name } = payload;
-
+    // Check if user exists
     let user = await User.findOne({ email });
+
+    // Create user if not exists
     if (!user) {
-      user = await User.create({ name, email, provider: "google" });
+
+      user = await User.create({
+        name,
+        email,
+
+        // Google users don't have password
+        password: null,
+
+        // Optional
+        photo,
+
+        // gender will be chosen later
+        gender: null
+      });
     }
 
+    // Generate token
     const accessToken = generateAccessToken(user._id);
-    const refreshToken = generateRefreshToken(user._id);
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
+    res.status(200).json({
+      success: true,
+
+      accessToken,
+
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        gender: user.gender,
+        photo: user.photo
+      }
     });
 
-    res.json({ accessToken });
   } catch (error) {
-    res.status(500).json({ message: "Google authentication failed" });
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
   }
 };
 
+// Update Gender
+exports.updateGender = async (req, res) => {
+  try {
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      {
+        gender: req.body.gender
+      },
+      {
+        new: true
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      user
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
 // Facebook Login
 exports.facebookLogin = async (req, res) => {
   try {
@@ -216,6 +267,32 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
+// Delete Acount
+exports.deleteAccount = async (req, res) => {
+  try {
+
+    // Delete user's wardrobe items
+    await Wardrobe.deleteMany({
+      user: req.user.id
+    });
+
+    // Delete user account
+    await User.findByIdAndDelete(req.user.id);
+
+    res.status(200).json({
+      success: true,
+      message: "Account deleted successfully"
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
 // Verify Email
 exports.verifyEmail = async (req, res) => {
   try {
