@@ -16,7 +16,6 @@ console.log("JWT_SECRET =", process.env.JWT_SECRET);
 connectDB();
 
 const app = express();
-app.set('trust proxy', 1);
 
 // Middleware
 app.use(cors());
@@ -32,12 +31,10 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Routes
-app.get("/", (req, res) => {
-  res.send("API is running ");
-});
 app.use("/api/auth", require("./src/routes/authRoutes"));
 app.use("/api/items", require("./src/routes/itemRoutes"));
 app.use("/api/wardrobe", require("./src/routes/wardrobeRoutes"));
+app.use("/api/chat", require("./src/routes/chatRoutes"));
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
