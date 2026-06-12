@@ -26,7 +26,11 @@ router.post("/google", googleAuth);
 router.put("/gender", protect, updateGender);
 router.post("/facebook-login", facebookLogin);
 router.post("/forgot-password", forgotPassword);
-router.put("/reset-password/:token", resetPassword);
+router.put(
+  "/resetPassword",
+  protect,
+  resetPassword
+);
 router.get("/verify-email/:token", verifyEmail);
 router.post("/refresh-token", refreshToken);
 router.delete(
