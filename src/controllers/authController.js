@@ -244,29 +244,44 @@ res.json({ message: "Reset token generated", resetToken });
 // Reset Password
 exports.resetPassword = async (req, res) => {
   try {
-    const { token } = req.params;
-    const { password } = req.body;
 
-    const user = await User.findOne({
-      resetPasswordToken: token,
-      resetPasswordExpire: { $gt: Date.now() },
-    });
+    const { currentPassword, newPassword } = req.body;
 
-    if (!user)
-      return res.status(400).json({ message: "Invalid or expired token" });
+    const user = await User.findById(req.user.id);
 
-    user.password = await bcrypt.hash(password, 10);
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpire = undefined;
+    const isMatch = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: "Current password is incorrect"
+      });
+    }
+
+    user.password = await bcrypt.hash(
+      newPassword,
+      10
+    );
 
     await user.save();
 
-    res.json({ message: "Password updated successfully" });
+    res.json({
+      success: true,
+      message: "Password updated successfully"
+    });
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
   }
 };
-
 // Delete Acount
 exports.deleteAccount = async (req, res) => {
   try {
