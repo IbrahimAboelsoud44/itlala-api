@@ -32,6 +32,7 @@ exports.signup = async (req, res) => {
       name,
       email,
       gender,
+      photo,
       password: hashedPassword,
       verificationToken,
     });
@@ -50,6 +51,7 @@ exports.signup = async (req, res) => {
     name: user.name,
     email: user.email,
     gender: user.gender,
+    photo: user.photo
   } });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -287,6 +289,7 @@ exports.deleteAccount = async (req, res) => {
   try {
 
     // Delete user's wardrobe items
+    
     await Wardrobe.deleteMany({
       user: req.user.id
     });
