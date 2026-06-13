@@ -32,7 +32,6 @@ exports.signup = async (req, res) => {
       name,
       email,
       gender,
-      photo,
       password: hashedPassword,
       verificationToken,
     });
@@ -132,6 +131,7 @@ exports.googleAuth = async (req, res) => {
       user = await User.create({
         name,
         email,
+        
 
         // Google users don't have password
         password: null,
@@ -140,7 +140,8 @@ exports.googleAuth = async (req, res) => {
         photo,
 
         // gender will be chosen later
-        gender: null
+        gender: null,
+        provider: "google"
       });
     }
 
@@ -158,6 +159,7 @@ exports.googleAuth = async (req, res) => {
         email: user.email,
         gender: user.gender,
         photo: user.photo
+        
       }
     });
 
