@@ -7,7 +7,7 @@ const itemSchema = new mongoose.Schema(
     subcategory: String,
     gender: {
       type: String,
-      enum: ["men", "women", "kids"],
+      enum: ["men", "women", "unisex"],
       required: true,
     },
     usage: String,
