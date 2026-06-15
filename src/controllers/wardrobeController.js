@@ -1,5 +1,6 @@
 const Wardrobe = require("../models/Wardrobe");
 const Item = require("../models/Item");
+const cloudinary = require("../config/cloudinary");
 
 // Add item
 exports.addToWardrobe = async (req, res) => {
@@ -110,5 +111,88 @@ exports.removeFromWardrobe = async (req, res) => {
       success: false,
       message: "Server error",
     });
+  }
+};
+
+// Custum wardrobe
+exports.addCustomItem = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const {
+      category,
+      subcategory,
+      gender,
+      material,
+      pattern,
+      fit,
+      sleeve,
+      colors,
+      season,
+      description,
+      imageBase64,
+    } = req.body;
+
+    //Validation
+if (!imageBase64) {
+  return res.status(400).json({
+    success: false,
+    message: "imageBase64 is required",
+  });
+}
+
+    // Upload image to Cloudinary
+    const uploadResult = await cloudinary.uploader.upload(
+      imageBase64,
+      {
+        folder: "itlala/custom",
+      }
+    );
+
+    // Create item
+    const item = await Item.create({
+      imageUrl: uploadResult.secure_url,
+      category,
+      subcategory,
+      gender,
+      material,
+      pattern,
+      fit,
+      sleeve,
+      colors,
+      season,
+      description,
+    });
+
+    // Find wardrobe
+    let wardrobe = await Wardrobe.findOne({
+      user: userId,
+    });
+
+    if (!wardrobe) {
+      wardrobe = await Wardrobe.create({
+        user: userId,
+        items: [item._id],
+      });
+    } else {
+      wardrobe.items.push(item._id);
+      await wardrobe.save();
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "Custom item added successfully",
+      item,
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
   }
 };
