@@ -117,7 +117,43 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-// Update profile photo
+//Update profileName
+exports.updateName = async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Name is required",
+      });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      {
+        name: name.trim(),
+      },
+      {
+        new: true,
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Name updated successfully",
+      name: user.name,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Update profilePhoto
 exports.updateProfilePhoto = async (req, res) => {
   try {
 
