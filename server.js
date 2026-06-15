@@ -40,6 +40,7 @@ app.use(limiter);
 app.use("/api/auth", require("./src/routes/authRoutes"));
 app.use("/api/items", require("./src/routes/itemRoutes"));
 app.use("/api/wardrobe", require("./src/routes/wardrobeRoutes"));
+app.use("/api/stats", require("./src/routes/statsRoutes"));
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
