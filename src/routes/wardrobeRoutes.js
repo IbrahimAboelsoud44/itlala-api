@@ -3,6 +3,7 @@ const {
   addToWardrobe,
   getMyWardrobe,
   removeFromWardrobe,
+  addCustomItem,
 } = require("../controllers/wardrobeController");
 
 const { protect } = require("../middleware/auth.middleware");
@@ -12,5 +13,6 @@ const router = express.Router();
 router.post("/", protect, addToWardrobe);
 router.get("/", protect, getMyWardrobe);
 router.delete("/:itemId", protect, removeFromWardrobe);
+router.post("/custom", protect, addCustomItem);
 
 module.exports = router;
