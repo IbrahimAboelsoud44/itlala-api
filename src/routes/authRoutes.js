@@ -6,9 +6,9 @@ const {
   signup,
   login,
   getProfile,
+  updateProfilePhoto,
   googleAuth,
   updateGender,
-  facebookLogin,
   forgotPassword,
   resetPassword,
   verifyEmail,
@@ -16,27 +16,27 @@ const {
   deleteAccount,
 } = require("../controllers/authController");
 
-
-
-
-router.post("/signup", signupValidation, signup); 
+// Auth
+router.post("/signup", signupValidation, signup);
 router.post("/login", loginValidation, login);
-router.get("/profile", protect, getProfile);
 router.post("/google", googleAuth);
-router.put("/gender", protect, updateGender);
-router.post("/facebook-login", facebookLogin);
-router.post("/forgot-password", forgotPassword);
-router.put(
-  "/resetPassword",
-  protect,
-  resetPassword
-);
+
+// Verification
 router.get("/verify-email/:token", verifyEmail);
+
+// Password
+router.post("/forgot-password", forgotPassword);
+router.put("/reset-password", protect, resetPassword);
 router.post("/refresh-token", refreshToken);
-router.delete(
-  "/delete-account",
-  protect,
-  deleteAccount
-);
+
+// Profile
+router.get("/profile", protect, getProfile);
+router.put("/profile-photo", protect, updateProfilePhoto);
+router.put("/gender", protect, updateGender);
+
+// Account
+router.delete("/delete-account", protect, deleteAccount);
+
+
 
 module.exports = router;
