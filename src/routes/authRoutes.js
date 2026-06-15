@@ -7,6 +7,7 @@ const {
   login,
   getProfile,
   updateProfilePhoto,
+  updateName,
   googleAuth,
   updateGender,
   forgotPassword,
@@ -33,6 +34,7 @@ router.post("/refresh-token", refreshToken);
 router.get("/profile", protect, getProfile);
 router.put("/profile-photo", protect, updateProfilePhoto);
 router.put("/gender", protect, updateGender);
+router.put("/update-name",protect,updateName);
 
 // Account
 router.delete("/delete-account", protect, deleteAccount);
