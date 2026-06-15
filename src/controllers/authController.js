@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const axios = require("axios");
+const cloudinary = require("../config/cloudinary");
 const User = require("../models/User");
 const Wardrobe = require("../models/Wardrobe");
 
@@ -116,6 +117,51 @@ exports.getProfile = async (req, res) => {
   }
 };
 
+// Update profile photo
+exports.updateProfilePhoto = async (req, res) => {
+  try {
+
+    const { imageBase64 } = req.body;
+
+    if (!imageBase64) {
+      return res.status(400).json({
+        success: false,
+        message: "imageBase64 is required"
+      });
+    }
+
+    const uploadResult = await cloudinary.uploader.upload(
+      imageBase64,
+      {
+        folder: "itlala/profile-images"
+      }
+    );
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      {
+        photo: uploadResult.secure_url
+      },
+      {
+        new: true
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Profile photo updated successfully",
+      photo: user.photo
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
 // Google Login
 exports.googleAuth = async (req, res) => {
   try {
@@ -199,28 +245,6 @@ exports.updateGender = async (req, res) => {
       message: error.message
     });
 
-  }
-};
-// Facebook Login
-exports.facebookLogin = async (req, res) => {
-  try {
-    const { accessToken } = req.body;
-
-    const response = await axios.get(
-      `https://graph.facebook.com/me?fields=id,name,email&access_token=${accessToken}`
-    );
-
-    const { email, name } = response.data;
-
-    let user = await User.findOne({ email });
-    if (!user) {
-      user = await User.create({ name, email, provider: "facebook" });
-    }
-
-    const token = generateAccessToken(user._id);
-    res.json({ accessToken: token });
-  } catch (error) {
-    res.status(500).json({ message: "Facebook authentication failed" });
   }
 };
 
