@@ -35,6 +35,21 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    modelUsage: {
+  classification: {
+    type: Number,
+    default: 0,
+  },
+  recommendation: {
+    type: Number,
+    default: 0,
+  },
+  virtualTryOn: {
+    type: Number,
+    default: 0,
+  },
+},
+    
     verificationToken: String,
     resetPasswordToken: String,
     resetPasswordExpire: Date,
