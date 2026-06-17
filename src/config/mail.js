@@ -12,3 +12,5 @@ const transporter = nodemailer.createTransport({
   greetingTimeout: 30000,
   socketTimeout: 30000,
 });
+
+module.exports = transporter;
