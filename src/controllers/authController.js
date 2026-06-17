@@ -322,7 +322,7 @@ exports.forgotPassword = async (req, res) => {
 
     // Send Email
     await transporter.sendMail({
-      from:` "ITLALA Support" <${process.env.EMAIL_USER}>`,
+      from:` "ITLALA Support" <${itlalateam@gmail.com}>`,
       to: user.email,
       subject: "Reset Your ITLALA Password",
       html: `
