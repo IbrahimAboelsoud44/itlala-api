@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema(
     },
     provider: {
       type: String,
-      default: "local", // local / google
+      default: "local", // local / google / facebook
     },
     role: {
       type: String,
