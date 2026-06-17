@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const axios = require("axios");
+const transporter = require("../config/mail");
 const cloudinary = require("../config/cloudinary");
 const User = require("../models/User");
 const Wardrobe = require("../models/Wardrobe");
@@ -86,6 +87,7 @@ exports.login = async (req, res) => {
     name: user.name,
     email: user.email,
     gender: user.gender,
+    photo: user.photo
   } });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -289,24 +291,140 @@ exports.forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
 
+    // Check if user exists
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: "User not found" });
 
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Prevent Google users from resetting password
+    if (user.provider === "google") {
+      return res.status(400).json({
+        success: false,
+        message: "This account uses Google Sign-In.",
+      });
+    }
+
+    // Generate Reset Token
     const resetToken = crypto.randomBytes(20).toString("hex");
+
     user.resetPasswordToken = resetToken;
-    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 دقائق
+    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
 
     await user.save();
 
+    // Create Reset Link
+    const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
 
-res.json({ message: "Reset token generated", resetToken });
+    // Send Email
+    await transporter.sendMail({
+      from:` "ITLALA Support" <${process.env.EMAIL_USER}>`,
+      to: user.email,
+      subject: "Reset Your ITLALA Password",
+      html: `
+        <h2>Password Reset Request</h2>
+
+        <p>Hello ${user.name || "User"},</p>
+
+        <p>We received a request to reset your password.</p>
+
+        <p>
+          Click the button below to create a new password:
+        </p>
+
+        <a
+          href="${resetUrl}"
+          style="
+            display:inline-block;
+            padding:12px 24px;
+            background:#000;
+            color:#fff;
+            text-decoration:none;
+            border-radius:6px;
+          "
+        >
+          Reset Password
+        </a>
+
+        <p>This link will expire in <strong>10 minutes</strong>.</p>
+
+        <p>If you didn't request this, simply ignore this email.</p>
+
+        <br>
+
+        <p>ITLALA Team</p>
+      `,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset email sent successfully.",
+    });
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
   }
 };
 
 // Reset Password
 exports.resetPassword = async (req, res) => {
+  try {
+
+    const { token } = req.params;
+    const { password } = req.body;
+
+    // Find user by reset token
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpire: {
+        $gt: Date.now()
+      }
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired reset token"
+      });
+    }
+
+    // Hash new password
+    user.password = await bcrypt.hash(password, 10);
+
+    // Remove token
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset successfully"
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+};
+
+// Change Password
+exports.changePassword = async (req, res) => {
   try {
 
     const { currentPassword, newPassword } = req.body;
