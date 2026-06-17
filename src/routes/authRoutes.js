@@ -12,6 +12,7 @@ const {
   updateGender,
   forgotPassword,
   resetPassword,
+  changePassword,
   verifyEmail,
   refreshToken,
   deleteAccount,
@@ -27,7 +28,8 @@ router.get("/verify-email/:token", verifyEmail);
 
 // Password
 router.post("/forgot-password", forgotPassword);
-router.put("/reset-password", protect, resetPassword);
+router.put("/reset-password/:token", resetPassword);
+router.put("/change-password", protect, changePassword);
 router.post("/refresh-token", refreshToken);
 
 // Profile
