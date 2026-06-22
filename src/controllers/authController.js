@@ -109,6 +109,7 @@ exports.getProfile = async (req, res) => {
         email: user.email,
         createdAt: user.createdAt,
         wardrobeCount: wardrobe ? wardrobe.items.length : 0,
+        modelUsage: user.modelUsage,
       },
     });
   } catch (error) {
