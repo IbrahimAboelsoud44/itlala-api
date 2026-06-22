@@ -48,6 +48,10 @@ const userSchema = new mongoose.Schema(
     type: Number,
     default: 0,
   },
+  avatar: {
+    type: Number,
+    default: 0,
+  },
 },
     
     verificationToken: String,
