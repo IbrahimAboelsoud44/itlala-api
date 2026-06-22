@@ -8,6 +8,7 @@ exports.trackModelUsage = async (req, res) => {
       "classification",
       "recommendation",
       "virtualTryOn",
+      "avatar",
     ];
 
     if (!allowedModels.includes(model)) {
